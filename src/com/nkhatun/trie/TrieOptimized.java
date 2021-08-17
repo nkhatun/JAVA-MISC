@@ -31,23 +31,6 @@ public class TrieOptimized {
 		temp.isENdOfWord = true;
 	}
 
-	public static void display(TrieNode root, StringBuilder sequence,
-			int depth) {
-		if (root == null) {
-			return;
-		}
-		if (root.isENdOfWord) {
-			displayNode(sequence, depth);
-		}
-		TrieNode temp = root;
-		if (temp.children != null && temp.children.size() > 0) {
-			temp.children.entrySet().forEach(children -> {
-				sequence.append(children.getKey());
-				display(children.getValue(), sequence, depth + 1);
-			});
-		}
-	}
-
 	public static boolean search(String word) {
 		TrieNode temp = root;
 		for (char c : word.toCharArray()) {
@@ -57,15 +40,6 @@ public class TrieOptimized {
 			temp = temp.children.get(c);
 		}
 		return temp.isENdOfWord;
-	}
-
-	public static void displayNode(StringBuilder sb, int depth) {
-		String str = sb.toString();
-		int len = str.length();
-		int start = len - depth;
-		for (int i = start; i < len; i++) {
-			System.out.println(str.charAt(i));
-		}
 	}
 
 	public static boolean isEmpty(TrieNode root) {
@@ -131,12 +105,23 @@ public class TrieOptimized {
 		TrieNode temp = root;
 		for (char ch : prefix.toCharArray()) {
 			TrieNode child = temp.children.get(ch);
-			if(child == null) {
+			if (child == null) {
 				return false;
 			}
 			temp = temp.children.get(ch);
 		}
 		return true;
+	}
+
+	public static void displayContent(TrieNode root, StringBuilder str) {
+		if (root.isENdOfWord || root.children.isEmpty()) {
+			System.out.println(str);
+		}
+
+		root.children.entrySet().forEach(children -> {
+			displayContent(children.getValue(), new StringBuilder(str)
+					.append((children.getKey().toString())));
+		});
 	}
 
 	public static void main(String args[]) {
@@ -145,14 +130,12 @@ public class TrieOptimized {
 		insertKey("the");
 		insertKey("and");
 		insertKey("dear");
-		// display(root, new StringBuilder(""), 0);
-		// System.out.println(search("a"));
-		// System.out.println(search("bc"));
 		System.out.println("Before............");
-		display(root, new StringBuilder(""), 0);
+		displayContent(root, new StringBuilder(""));
 		delete("and");
 		System.out.println("After removal............");
-		display(root, new StringBuilder(""), 0);
-
+		displayContent(root, new StringBuilder(""));
+		System.out.println(search("and"));
+		System.out.println(search("abc"));
 	}
 }
