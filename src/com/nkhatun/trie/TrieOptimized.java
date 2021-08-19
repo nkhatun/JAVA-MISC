@@ -123,10 +123,9 @@ public class TrieOptimized {
 					.append((children.getKey().toString())));
 		});
 	}
-
 	public static void main(String args[]) {
 		root = new TrieNode();
-		insertKey("abc");
+    	insertKey("abc");
 		insertKey("the");
 		insertKey("and");
 		insertKey("dear");
