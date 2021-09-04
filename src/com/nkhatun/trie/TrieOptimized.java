@@ -1,7 +1,10 @@
 package com.nkhatun.trie;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.nkhatun.trie.SimpleTrie.TrieNode;
 
@@ -12,13 +15,12 @@ public class TrieOptimized {
 		boolean isENdOfWord;
 		Map<Character, TrieNode> children;
 		TrieNode() {
-			isENdOfWord = false;
-			children = new HashMap<Character, TrieNode>();
+			this.isENdOfWord = false;
+			this.children = new HashMap<Character, TrieNode>();
 		}
 	}
 
 	public static void insertKey(String word) {
-		int len = word.length();
 		TrieNode temp = root;
 		for (char c : word.toCharArray()) {
 			if (!temp.children.containsKey(c)) {
@@ -29,27 +31,10 @@ public class TrieOptimized {
 		temp.isENdOfWord = true;
 	}
 
-	public static void display(TrieNode root, StringBuilder sequence,
-			int depth) {
-		if (root == null) {
-			return;
-		}
-		if (root.isENdOfWord) {
-			displayNode(sequence, depth);
-		}
-		TrieNode temp = root;
-		if (temp.children != null && temp.children.size() > 0) {
-			temp.children.entrySet().forEach(children -> {
-				sequence.append(children.getKey());
-				display(children.getValue(), sequence, depth + 1);
-			});
-		}
-	}
-	
 	public static boolean search(String word) {
 		TrieNode temp = root;
 		for (char c : word.toCharArray()) {
-			if(!temp.children.containsKey(c)) {
+			if (!temp.children.containsKey(c)) {
 				return false;
 			}
 			temp = temp.children.get(c);
@@ -57,86 +42,99 @@ public class TrieOptimized {
 		return temp.isENdOfWord;
 	}
 
-	public static void displayNode(StringBuilder sb, int depth) {
-		String str = sb.toString();
-		int len = str.length();
-		int start = len - depth;
-		for (int i = start; i < len; i++) {
-			System.out.println(str.charAt(i));
-		}
-	}
-	
 	public static boolean isEmpty(TrieNode root) {
-		if(root.children != null && root.children.size() > 0) {
+		if (root.children != null && root.children.size() > 0) {
 			return false;
-		}		
+		}
 		return true;
 	}
-
-	/** Deletes a word from the trie if present, and return true if the word is deleted successfully. */
 	public static boolean delete(String word) {
 		if (word == null || word.length() == 0) {
 			return false;
 		}
-
-		// All nodes below 'deleteBelow' and on the path starting with 'deleteChar' (including itself) will be deleted if needed
 		TrieNode deleteBelow = null;
 		char deleteChar = '\0';
 
-		// Search to ensure word is present
 		TrieNode parent = root;
 		for (int i = 0; i < word.length(); i++) {
 			char cur = word.charAt(i);
-
-			TrieNode child = parent.children.get(cur); // Check if having a TrieNode associated with 'cur'
-			if (child == null) { // null if 'word' is way too long or its prefix doesn't appear in the Trie
+			TrieNode child = parent.children.get(cur);
+			if (child == null) {
 				return false;
 			}
-
-			if (parent.children.size() > 1 || parent.isENdOfWord) { // Update 'deleteBelow' and 'deleteChar'
+			if (parent.children.size() > 1 || parent.isENdOfWord) {
 				deleteBelow = parent;
 				deleteChar = cur;
 			}
-
 			parent = child;
 		}
-
-		if (!parent.isENdOfWord) { // word isn't in trie
+		if (!parent.isENdOfWord) {
 			return false;
 		}
 
 		if (parent.children.isEmpty()) {
 			deleteBelow.children.remove(deleteChar);
 		} else {
-			parent.isENdOfWord = false; // Delete word by mark it as not the end of a word
+			parent.isENdOfWord = false;
+		}
+		return true;
+	}
+	public static void remove(String word) {
+		if (search(word) == false) {
+			System.out.println(word + " does not present in trien");
+			return;
+		}
+		TrieNode current = root;
+		for (char ch : word.toCharArray()) {
+			TrieNode child = current.children.get(ch);
+			if (child.children.size() == 1) {
+				current.children.remove(ch);
+				return;
+			} else {
+				current = child;
+			}
+		}
+		current.isENdOfWord = false;
+	}
+
+	public static boolean startsWith(String prefix) {
+		if (prefix == null) {
+			return false;
 		}
 
+		TrieNode temp = root;
+		for (char ch : prefix.toCharArray()) {
+			TrieNode child = temp.children.get(ch);
+			if (child == null) {
+				return false;
+			}
+			temp = temp.children.get(ch);
+		}
 		return true;
 	}
 
-	public static TrieNode getNode(TrieNode root,char c){
-		if(root == null){return null;}
-		TrieNode temp = root;
-		for (Entry<Character, TrieNode> f : root.children.entrySet()) {
-			if (f.getKey() == c) {
-				temp = f.getValue();
-			}
+	public static void displayContent(TrieNode root, StringBuilder str) {
+		if (root.isENdOfWord || root.children.isEmpty()) {
+			System.out.println(str);
 		}
-		return temp;
-	}
 
+		root.children.entrySet().forEach(children -> {
+			displayContent(children.getValue(), new StringBuilder(str)
+					.append((children.getKey().toString())));
+		});
+	}
 	public static void main(String args[]) {
 		root = new TrieNode();
-		insertKey("abc");
+    	insertKey("abc");
 		insertKey("the");
 		insertKey("and");
-//		display(root, new StringBuilder(""), 0);
-		System.out.println(search("a"));
-		System.out.println(search("bc"));
+		insertKey("dear");
 		System.out.println("Before............");
-//		display(root, new StringBuilder(""), 0);
-		delete("abc");
+		displayContent(root, new StringBuilder(""));
+		delete("and");
 		System.out.println("After removal............");
-		display(root, new StringBuilder(""), 0);
+		displayContent(root, new StringBuilder(""));
+		System.out.println(search("and"));
+		System.out.println(search("abc"));
 	}
 }
